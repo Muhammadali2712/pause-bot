@@ -3,31 +3,42 @@ import asyncio
 from telegram import Bot
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GROUP_CHAT_ID = "-1001234567890"  # ← ЗАМЕНИТЕ НА СВОЙ ID ПОЗЖЕ def main():
+GROUP_CHAT_ID = "-5214164660"  # ← ЗАМЕНИТЕ НА СВОЙ ID!
+
+async def main():
     if not BOT_TOKEN:
-        print("Ошибка: BOT_TOKEN не установлен!")
+        print("❌ BOT_TOKEN не установлен!")
         return
 
     bot = Bot(token=BOT_TOKEN)
     try:
-        # Получаем последние 5 сообщений из группы
+        # Проверка доступа к группе
+        await bot.send_message(
+            chat_id=GROUP_CHAT_ID,
+            text="✅ Бот работает. Ожидание сообщений от @in_siderpay_bot..."
+        )
+        print("✅ Бот может писать в группу")
+    except Exception as e:
+        print(f"❌ Ошибка при отправке тестового сообщения: {e}")
+        return
+
+    # Проверка последних сообщений
+    try:
         updates = await bot.get_updates(limit=5, timeout=15)
         for update in reversed(updates):
             msg = update.message
             if msg and str(msg.chat.id) == GROUP_CHAT_ID:
-                if msg.from_user and msg.from_user.username == "in_siderpay_bot":
-                    # Проверяем, нет ли уже ответа на это сообщение
-                    if not msg.reply_to_message:
-                        await bot.send_message(
-                            chat_id=GROUP_CHAT_ID,
-                            text="Ставьте на паузу пожалуйста",
-                            reply_to_message_id=msg.message_id
-                        )
-                        print(f"✅ Ответили на сообщение #{msg.message_id}")
-                        return
-        print("❌ Нет новых сообщений от @in_siderpay_bot")
+                if msg.from_user and msg.from_user.username == "gushtbiryon":
+                    await bot.send_message(
+                        chat_id=GROUP_CHAT_ID,
+                        text="Ставьте на паузу пожалуйста",
+                        reply_to_message_id=msg.message_id
+                    )
+                    print(f"✅ Ответили на сообщение #{msg.message_id}")
+                    return
+        print("ℹ️ Нет новых сообщений от @in_siderpay_bot")
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
+        print(f"❌ Ошибка при чтении сообщений: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
